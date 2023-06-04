@@ -1,3 +1,4 @@
+
 from rdflib.graph import Graph, URIRef
 from pyrdf2vec import RDF2VecTransformer
 from gensim.models import Word2Vec
@@ -9,13 +10,13 @@ import random
 from tqdm import tqdm
 
 # Define parameters run
-num_sim_pred = 10000
+num_sim_pred = 16384
 # Num triples to visit during walk
-depth_walk = 1
-kg = KG("dataBerlin/dataset.nt", fmt="nt")
+depth_walk = 2
+kg = KG("dataWatDiv/dataset.nt", fmt="nt")
 
 g = Graph()
-g.parse("dataBerlin/dataset.nt", format="nt")
+g.parse("dataWatDiv/dataset.nt", format="nt")
 
 # Get all predicates and entities
 all_predicate_occurence = []
@@ -85,11 +86,12 @@ for predicate in predicatesURI:
             walk_in_progress.append(lastElement)
             all_walks.append(walk_in_progress)
             num_walks_predicate += 1
+
 entities = list(entities)
 corpus = [[str(word) for word in walk] for walk in all_walks]
 vector_dim = 128
 model = Word2Vec(corpus, min_count=1, window=5, vector_size=vector_dim, epochs=100)
-with open('dataBerlin/vectorsSmall/vectors.txt', 'w') as f:
+with open('dataWatDiv/vectorsWatDiv/vectors_depth_2.txt', 'w') as f:
     # First write predicates to file
     for predicate in predicates:
         if predicate in model.wv:
