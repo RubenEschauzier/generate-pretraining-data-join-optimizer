@@ -3,7 +3,6 @@ from gensim.models import Word2Vec
 import itertools
 import random
 
-
 def get_all_predicates(g):
     all_predicate_occurrence = []
     predicates = set()
@@ -196,17 +195,6 @@ def get_average_difference_occurrences(subj_dict_walk, subj_dict, obj_dict_walk,
         diff = value
         if key in obj_dict_walk:
             diff = value - obj_dict_walk[key]
-        else:
-            total_missing_obj += 1
-        total_difference_obj += diff
-    avg_diff_obj = total_difference_obj / len(obj_dict.items())
-    print("Average difference in actual graph and random walk and number of subjects missing from walks entirely")
-    print(avg_diff_subj)
-    print(total_missing_subj)
-    print("Average difference in actual graph and random walk and number of objects missing from walks entirely")
-    print(avg_diff_obj)
-    print(total_missing_obj)
-
 
 def train_model(walks):
     corpus = [[str(word) for word in walk] for walk in walks]
