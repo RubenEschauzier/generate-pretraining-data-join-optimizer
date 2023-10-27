@@ -195,13 +195,13 @@ def regression_all_queries(sim, sel_s_in, sel_s_out, sel_c, sel_c_rev):
     print("Regression results inversed chain queries")
     regression_analysis_selectivities(sim, sel_c_rev)
 
-
-emb, pred, pred_emb_dict = load_clean_data('dataWatDiv/dataset.nt', 'dataWatDiv/vectorsWatDiv/vectors_depth_2.txt')
-star_in, star_out, chain, chain_reversed, sim = get_all_queries(pred_emb_dict, 2000)
-sel_s_in, sel_s_out, sel_c, sel_c_rev = execute_queries('dataWatDiv/dataset.nt', star_in, star_out, chain,
-                                                        chain_reversed)
-regression_all_queries(np.array(sim), np.array(sel_s_in), np.array(sel_s_out),
-                       np.array(sel_c), np.array(sel_c_rev))
+if __name__ == "__main__":
+    emb, pred, pred_emb_dict = load_clean_data('dataWatDiv/dataset.nt', 'dataWatDiv/vectorsWatDiv/vectors_depth_2.txt')
+    star_in, star_out, chain, chain_reversed, sim = get_all_queries(pred_emb_dict, 2000)
+    sel_s_in, sel_s_out, sel_c, sel_c_rev = execute_queries('dataWatDiv/dataset.nt', star_in, star_out, chain,
+                                                            chain_reversed)
+    regression_all_queries(np.array(sim), np.array(sel_s_in), np.array(sel_s_out),
+                           np.array(sel_c), np.array(sel_c_rev))
 # regression_analysis_selectivities(np.array(sim), np.array(sel_s_in))
 
 # queries_low = []
