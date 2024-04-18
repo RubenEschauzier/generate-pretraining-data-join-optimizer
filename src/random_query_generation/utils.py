@@ -1,9 +1,9 @@
 import math
-
 import numpy as np
 import random
 import re
 import rdflib.term
+from typing import Literal
 from rdflib.compare import to_isomorphic
 from rdflib.graph import Graph
 from sklearn.preprocessing import minmax_scale
@@ -63,6 +63,13 @@ def get_all_object(g):
     for (_, _, obj) in g:
         all_obj.add(obj)
     return all_obj
+
+
+def get_all_predicates(g):
+    all_pred = set()
+    for (_, p, _) in g:
+        all_pred.add(p)
+    return all_pred
 
 
 def get_start_triple_walk(start_point, g):
@@ -146,9 +153,10 @@ def filter_equivalent_queries(walk_query,
     return all_queries, used_predicates_dict
 
 
-def generate_triple_string(triple, r, prob_non_variable_edge, term_to_variable_dict, object_centre):
+def generate_triple_string(g, triple, r, prob_non_variable_edge, term_to_variable_dict, p_corrupt_literal,
+                           object_centre=False):
     non_variable_edge = False
-    if r > prob_non_variable_edge or object_centre:
+    if r > prob_non_variable_edge:
         triple_string = "{} <{}> {} . ".format(
             term_to_variable_dict[triple[0]],
             triple[1],
@@ -156,32 +164,90 @@ def generate_triple_string(triple, r, prob_non_variable_edge, term_to_variable_d
         )
     elif object_centre:
         non_variable_edge = True
-        if type(triple[0]) == rdflib.term.Literal:
+
+        # Randomly add corrupt literal as subject that will (likely) produce zero results
+        r = random.uniform(0, 1)
+        if r > p_corrupt_literal:
+            subject_to_add = triple[0]
+        else:
+            subject_to_add = get_corrupt_literal(g, 'subject')
+
+        if type(subject_to_add) == rdflib.term.Literal:
             triple_string = "\"{}\" <{}> {} . ".format(
-                triple[1],
+                subject_to_add,
                 triple[2],
                 term_to_variable_dict[triple[0]]
             )
         # If not literal, we need brackets around it
         else:
             triple_string = "<{}> <{}> {} . ".format(
-                triple[1],
+                subject_to_add,
                 triple[2],
                 term_to_variable_dict[triple[0]]
             )
     else:
         non_variable_edge = True
-        if type(triple[2]) == rdflib.term.Literal:
+
+        # Randomly add corrupt literal that will (likely) produce zero results
+        r = random.uniform(0, 1)
+        if r > p_corrupt_literal:
+            object_to_add = triple[2]
+        else:
+            object_to_add = get_corrupt_literal(g, 'object')
+
+        if type(object_to_add) == rdflib.term.Literal:
             triple_string = "{} <{}> \"{}\" . ".format(
                 term_to_variable_dict[triple[0]],
                 triple[1],
-                triple[2]
+                object_to_add
             )
         # If not literal, we need brackets around it
         else:
             triple_string = "{} <{}> <{}> . ".format(
                 term_to_variable_dict[triple[0]],
                 triple[1],
-                triple[2]
+                object_to_add
             )
     return triple_string, non_variable_edge
+
+
+def generate_corrupted_predicates_walks(g, walks, n_corrupted_walks, max_predicates_corrupted, p_corrupted):
+    all_predicates = get_all_predicates(g)
+    all_corrupted_walks = []
+    for walk in walks:
+        for i in range(n_corrupted_walks):
+            corrupted_walk = []
+            n_corrupted = 0
+            for triple in walk:
+                r = random.uniform(0, 1)
+                # 'corrupt' a predicate in walk with random predicate
+                if r < p_corrupted and n_corrupted < max_predicates_corrupted:
+                    corrupted_triple = (triple[0], random.choice(list(all_predicates)), triple[2])
+                    corrupted_walk.append(corrupted_triple)
+                    n_corrupted += 1
+                # Otherwise just add triple to walk
+                else:
+                    corrupted_walk.append(triple)
+            # Only add walk if we actually corrupted a predicate
+            if n_corrupted > 0:
+                all_corrupted_walks.append(corrupted_walk)
+    return all_corrupted_walks
+
+
+def get_corrupt_literal(g, corruptionType):
+    if corruptionType == 'object':
+        return randomly_sample_object_literal(g)
+    elif corruptionType == 'subject':
+        return randomly_sample_subject_literal(g)
+    else:
+        raise ValueError("Invalid parameter passed to literal corruption function")
+
+
+def randomly_sample_object_literal(g):
+    objects = get_all_object(g)
+    return random.choice(list(objects))
+
+
+def randomly_sample_subject_literal(g):
+    subjects = get_all_subject(g)
+    return random.choice(list(subjects))

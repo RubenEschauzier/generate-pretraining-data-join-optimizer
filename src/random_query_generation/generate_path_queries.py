@@ -1,8 +1,9 @@
 import random
 import rdflib.term
+from tqdm import tqdm
 from src.random_query_generation.utils import filter_isomorphic_queries, update_counts_predicates_used, \
     choose_triple_weighted, get_start_triple_walk, get_all_subject, track_equivalent_predicates, \
-    filter_equivalent_queries
+    filter_equivalent_queries, generate_corrupted_predicates_walks
 
 
 # Note: the walk v1 -> v2 -> v3 has v1 as tail and v3 as head
@@ -41,7 +42,8 @@ def extend_walk_path(g, head, tail, walk, predicate_usage_counts=None):
 def generate_path_walks(g, start_points, repeats, max_size):
     predicate_usage_counts = {}
     all_walks = []
-    for start in start_points:
+    print("Generating path walks \n")
+    for start in tqdm(start_points):
         for i in range(repeats):
             start_triple = get_start_triple_walk(start, g)
             head = start_triple[2]
@@ -61,12 +63,17 @@ def generate_path_walks(g, start_points, repeats, max_size):
 def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
     all_subj = get_all_subject(g)
     walks = generate_path_walks(g, all_subj, repeats, max_walk_size)
+    # Add walks that have random predicates in them to include queries with result size = 0
+    # TODO Add n_corrupted, max_corrupted, p_corruption as params
+    corrupted_predicates_walks = generate_corrupted_predicates_walks(g, walks, 2, 2, .25)
+    walks.extend(corrupted_predicates_walks)
 
     queries = []
     used_predicates = set()
     used_predicates_dict = {}
 
-    for walk in walks:
+    print("Generating path queries from walk \n")
+    for walk in tqdm(walks):
         predicates = tuple(sorted([triple[1] for triple in walk]))
         equivalent_predicates = track_equivalent_predicates(used_predicates, predicates)
         variable_counter = 1
@@ -108,16 +115,7 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
                         )
             walk_query += triple_string
         walk_query += "}"
-        # queries.append(walk_query)
-        queries, used_predicates_dict = \
-            filter_equivalent_queries(walk_query,
-                                      walk,
-                                      queries,
-                                      equivalent_predicates,
-                                      used_predicates_dict,
-                                      predicates,
-                                      non_variable_edges)
-    # filter_isomorphic_queries([query[0] for query in queries])
+        queries.append(walk_query)
     print("Filter path queries")
     queries = filter_isomorphic_queries(queries)
     return queries
