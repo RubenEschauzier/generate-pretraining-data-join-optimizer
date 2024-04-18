@@ -1,6 +1,6 @@
 import json
 
-from src.train_dataset_generation.queryVirtuoso import wrapper, execute_array_of_queries
+from src.get_cardinalities_queries.queryVirtuoso import wrapper, execute_array_of_queries
 
 
 def load_watdiv(query_location):
