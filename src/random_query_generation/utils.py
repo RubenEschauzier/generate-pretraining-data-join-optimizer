@@ -144,12 +144,12 @@ def filter_equivalent_queries(walk_query,
         # We scale the acceptance chance of a predicate combination that we've seen before with one literal with a
         # quasi-exponential function to prevent our queries primarily consisting of often occurring paths in the
         # graph
-        n_usages = used_predicates_dict[used_predicates]
-        accept_prob = 1 / math.exp(n_usages)
-        r = random.uniform(0, 1)
-        if r < accept_prob:
-            all_queries.append(walk_query)
-            used_predicates_dict[used_predicates] += 1
+        # n_usages = used_predicates_dict[used_predicates]
+        # accept_prob = 1 / math.exp(n_usages)
+        # r = random.uniform(0, 1)
+        # if r < accept_prob:
+        all_queries.append(walk_query)
+        used_predicates_dict[used_predicates] += 1
     return all_queries, used_predicates_dict
 
 
