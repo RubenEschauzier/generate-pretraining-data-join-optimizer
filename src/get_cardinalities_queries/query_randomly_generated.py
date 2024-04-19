@@ -1,4 +1,6 @@
 import json
+import os
+
 import numpy as np
 
 from src.get_cardinalities_queries.queryVirtuoso import execute_array_of_queries, wrapper
@@ -20,9 +22,18 @@ def main(endpoint, graph_uri, queries_location, dataset_save_location, ckp_locat
 
 
 if __name__ == "__main__":
-    main("http://localhost:8890/sparql",
-         "http://localhost:8890/watdiv-default-instantiation",
-         "C:/Users/Administrator/projects/preprocess_data_rl_optimizer/output/queries/queries_star_path.npy",
-         "C:/Users/Administrator/projects/preprocess_data_rl_optimizer/output/pretrain_dataset_full",
-         "C:/Users/Administrator/projects/preprocess_data_rl_optimizer/output/pretrain_dataset_full/chkp"
+    project_root = os.path.join(os.getcwd(), "..", "..")
+
+    randomly_generated_queries_location = os.path.join(project_root, "output", "randomly_generated_queries",
+                                                       "queries_complex.npy")
+    dataset_save_location = os.path.join(project_root, "output", "randomly_generated_train_dataset")
+    dataset_ckp_location = os.path.join(dataset_save_location, "ckp")
+    engine_endpoint = "http://localhost:8890/sparql"
+    graph_uri_endpoint = "http://localhost:8890/watdiv-default-instantiation"
+
+    main(engine_endpoint,
+         graph_uri_endpoint,
+         randomly_generated_queries_location,
+         dataset_save_location,
+         dataset_ckp_location
          )

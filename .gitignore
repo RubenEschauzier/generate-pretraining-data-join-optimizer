@@ -183,4 +183,12 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 /.idea/
-/dataWatDiv
+/data_watdiv
+/generation_results/
+/output/*
+
+# Output directory structure to seperate different script outputs
+!/output/randomly_generated_queries/.keep
+!/output/randomly_generated_train_dataset/.keep
+!/output/validation_dataset_watdiv/.keep
+!/output/entity_embeddings/.keep

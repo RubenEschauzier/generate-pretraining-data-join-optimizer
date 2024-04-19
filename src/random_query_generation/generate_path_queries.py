@@ -63,7 +63,7 @@ def generate_path_walks(g, start_points, repeats, max_size):
 def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
     all_subj = get_all_subject(g)
     walks = generate_path_walks(g, all_subj, repeats, max_walk_size)
-    # Add walks that have random predicates in them to include queries with result size = 0
+    # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     corrupted_predicates_walks = generate_corrupted_predicates_walks(g, walks, 2, 2, .25)
     walks.extend(corrupted_predicates_walks)
@@ -72,7 +72,7 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
     used_predicates = set()
     used_predicates_dict = {}
 
-    print("Generating path queries from walk \n")
+    print("Generating path randomly_generated_queries from walk \n")
     for walk in tqdm(walks):
         predicates = tuple(sorted([triple[1] for triple in walk]))
         equivalent_predicates = track_equivalent_predicates(used_predicates, predicates)
@@ -116,7 +116,7 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
             walk_query += triple_string
         walk_query += "}"
         queries.append(walk_query)
-    print("Filter path queries")
+    print("Filter path randomly_generated_queries")
     queries = filter_isomorphic_queries(queries)
     return queries
 

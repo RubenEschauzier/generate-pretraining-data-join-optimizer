@@ -17,7 +17,7 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
     print("Generating star walks subject centre \n")
     star_walks_subject_centre = generate_star_walks_subject_centre(g, all_subj, repeats, max_size_star,
                                                                    predicate_usage_counts_subject_centre)
-    # Add walks that have random predicates in them to include queries with result size = 0
+    # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     print("Corrupting star walks subject centre \n")
     corrupted_predicates_walks_subject_centre = generate_corrupted_predicates_walks(g, star_walks_subject_centre,
@@ -28,7 +28,7 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
     star_walks_object_centre = generate_star_walks_object_centre(g, all_obj, int(math.floor(repeats / 2)),
                                                                  max_size_star,
                                                                  predicate_usage_counts_object_centre)
-    # Add walks that have random predicates in them to include queries with result size = 0
+    # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     print("Corrupting star walks object centre \n")
     corrupted_predicates_walks_object_centre = generate_corrupted_predicates_walks(g, star_walks_object_centre,
@@ -41,8 +41,8 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
     used_predicates_subject_centre_dict = {}
     used_predicates_object_centre = set()
     used_predicates_object_centre_dict = {}
-    # Generate subject_centre queries
-    print("Generating subject centre star queries from walks \n")
+    # Generate subject_centre randomly_generated_queries
+    print("Generating subject centre star randomly_generated_queries from walks \n")
     for walk_subject_centre in tqdm(star_walks_subject_centre):
         predicates = tuple(sorted([triple[1] for triple in walk_subject_centre]))
         equivalent_predicates = track_equivalent_predicates(used_predicates_subject_centre, predicates)
@@ -71,10 +71,10 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
 
         queries_subject_centre.append(walk_query)
 
-    print("Filter subject centre star queries \n")
+    print("Filter subject centre star randomly_generated_queries \n")
     queries_subject_centre = filter_isomorphic_queries(queries_subject_centre)
 
-    print("Generating object centre star queries from walks \n")
+    print("Generating object centre star randomly_generated_queries from walks \n")
     for walk_obj_centre in tqdm(star_walks_object_centre):
         predicates = tuple(sorted([triple[1] for triple in walk_obj_centre]))
         equivalent_predicates = track_equivalent_predicates(used_predicates_object_centre, predicates)
@@ -101,7 +101,7 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
         walk_query += "}"
         queries_object_centre.append(walk_query)
 
-    print("Filtering object centre star queries \n")
+    print("Filtering object centre star randomly_generated_queries \n")
     queries_object_centre = filter_isomorphic_queries(queries_object_centre)
 
     return queries_subject_centre, queries_object_centre
@@ -146,7 +146,7 @@ def extend_star_walk(possible_star_points, max_points, all_walks, predicate_usag
     return all_walks
 
 
-# TODO: Docstring, note triple_to_ignore denotes the triple that connects multiple star queries together
+# TODO: Docstring, note triple_to_ignore denotes the triple that connects multiple star randomly_generated_queries together
 def get_possible_star_points_subject_centre(g, star_centre, points_to_ignore=None):
     all_triples = list(g.triples((star_centre, None, None)))
     if points_to_ignore:

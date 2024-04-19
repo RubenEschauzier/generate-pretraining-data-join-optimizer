@@ -57,7 +57,7 @@ def get_predicates_query(g, query):
 
 
 def run_predictor(file_loc_dataset, file_loc_vectors):
-    g = load_graph("dataWatDiv/dataset.nt")
+    g = load_graph("data_watdiv/dataset.nt")
     star_in, star_out, chain, chain_reversed, sim, emb, _, pred_emb_dict = \
         get_queries(file_loc_dataset, file_loc_vectors)
     star_X, star_y = obtain_datapoints_query(g, star_in, emb, pred_emb_dict)
@@ -65,4 +65,4 @@ def run_predictor(file_loc_dataset, file_loc_vectors):
 
 
 if __name__ == "__main__":
-    run_predictor('dataWatDiv/dataset.nt', 'dataWatDiv/vectorsWatDiv/vectors_depth_2.txt')
+    run_predictor('data_watdiv/dataset.nt', 'data_watdiv/vectorsWatDiv/vectors_depth_2.txt')

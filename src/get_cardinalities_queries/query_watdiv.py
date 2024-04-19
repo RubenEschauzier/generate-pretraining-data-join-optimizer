@@ -1,4 +1,5 @@
 import json
+import os
 
 from src.get_cardinalities_queries.queryVirtuoso import wrapper, execute_array_of_queries
 
@@ -21,11 +22,20 @@ def main(endpoint, graph_uri, queries_location, dataset_save_location, ckp_locat
 
 
 if __name__ == "__main__":
+    project_root = os.path.join(os.getcwd(), "..", "..")
+
+    watdiv_queries_location = os.path.join(project_root, "data_watdiv", "queries_watdiv",
+                                           "cleaned_watdiv_queries.txt")
+    save_location = os.path.join(project_root, "output", "validation_dataset_watdiv")
+    dataset_ckp_location = os.path.join(save_location, "ckp")
+    engine_endpoint = "http://localhost:8890/sparql"
+    graph_uri_endpoint = "http://localhost:8890/watdiv-default-instantiation"
+
     query_location = "C:/Users/Administrator/projects/" \
-                     "preprocess_data_rl_optimizer/dataWatDiv/queriesWatDiv/cleanedQueries.txt"
-    main("http://localhost:8890/sparql",
-         "http://localhost:8890/watdiv-default-instantiation",
+                     "preprocess_data_rl_optimizer/data_watdiv/queries_watdiv/cleaned_watdiv_queries.txt"
+    main(engine_endpoint,
+         graph_uri_endpoint,
          query_location,
-         "C:/Users/Administrator/projects/preprocess_data_rl_optimizer/output/validation_dataset_watdiv",
-         "C:/Users/Administrator/projects/preprocess_data_rl_optimizer/output/validation_dataset_watdiv/chkp"
+         save_location,
+         dataset_ckp_location
          )

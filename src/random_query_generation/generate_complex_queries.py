@@ -9,19 +9,19 @@ def generate_complex_queries(g, repeats, min_size_walk, max_size_walk, p_literal
     all_subj = get_all_subject(g)
 
     complex_walks = generate_complex_walks(g, all_subj, repeats, min_size_walk, max_size_walk)
-    # Add walks that have random predicates in them to include queries with result size = 0
+    # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     corrupted_predicates_walks = generate_corrupted_predicates_walks(g, complex_walks, 2, 2, .25)
     complex_walks.extend(corrupted_predicates_walks)
     # Count predicates in walks
 
     complex_queries = []
-    print("Generating queries from walks")
+    print("Generating randomly_generated_queries from walks")
     for walk in tqdm(complex_walks):
         walk_query = generate_complex_query_string(g, walk, p_literal)
         complex_queries.append(walk_query)
 
-    print("Filter complex queries")
+    print("Filter complex randomly_generated_queries")
     complex_queries = filter_isomorphic_queries(complex_queries)
     predicate_counts = count_predicates_queries(complex_queries)
     return complex_queries
@@ -143,6 +143,6 @@ def determine_outer_triples(walk):
     outer_objects = all_obj_walk.difference(all_subj_walk)
     outer_objects_no_common = [obj for obj in outer_objects if all_entities_in_walk.count(obj) < 2]
 
-    # Get associated triples, these triples can become literal queries in query generation
+    # Get associated triples, these triples can become literal randomly_generated_queries in query generation
     outer_object_triples = set([triple for triple in walk if triple[2] in outer_objects_no_common])
     return outer_object_triples

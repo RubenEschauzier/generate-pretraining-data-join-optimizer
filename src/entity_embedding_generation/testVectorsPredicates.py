@@ -186,19 +186,19 @@ def regression_analysis_selectivities(X, y):
 
 
 def regression_all_queries(sim, sel_s_in, sel_s_out, sel_c, sel_c_rev):
-    print("Regression results incoming star queries")
+    print("Regression results incoming star randomly_generated_queries")
     regression_analysis_selectivities(sim, sel_s_in)
-    print("Regression results outgoing star queries")
+    print("Regression results outgoing star randomly_generated_queries")
     regression_analysis_selectivities(sim, sel_s_out)
-    print("Regression results chain queries")
+    print("Regression results chain randomly_generated_queries")
     regression_analysis_selectivities(sim, sel_c)
-    print("Regression results inversed chain queries")
+    print("Regression results inversed chain randomly_generated_queries")
     regression_analysis_selectivities(sim, sel_c_rev)
 
 if __name__ == "__main__":
-    emb, pred, pred_emb_dict = load_clean_data('dataWatDiv/dataset.nt', 'dataWatDiv/vectorsWatDiv/vectors_depth_2.txt')
+    emb, pred, pred_emb_dict = load_clean_data('data_watdiv/dataset.nt', 'data_watdiv/vectorsWatDiv/vectors_depth_2.txt')
     star_in, star_out, chain, chain_reversed, sim = get_all_queries(pred_emb_dict, 2000)
-    sel_s_in, sel_s_out, sel_c, sel_c_rev = execute_queries('dataWatDiv/dataset.nt', star_in, star_out, chain,
+    sel_s_in, sel_s_out, sel_c, sel_c_rev = execute_queries('data_watdiv/dataset.nt', star_in, star_out, chain,
                                                             chain_reversed)
     regression_all_queries(np.array(sim), np.array(sel_s_in), np.array(sel_s_out),
                            np.array(sel_c), np.array(sel_c_rev))
