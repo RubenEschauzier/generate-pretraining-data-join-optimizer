@@ -22,7 +22,7 @@ def main(endpoint, graph_uri, queries_location, dataset_save_location, ckp_locat
 
 
 if __name__ == "__main__":
-    project_root = os.path.join(os.getcwd(), "..", "..")
+    project_root = os.getcwd()
 
     watdiv_queries_location = os.path.join(project_root, "data_watdiv", "queries_watdiv",
                                            "cleaned_watdiv_queries.txt")

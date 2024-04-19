@@ -8,7 +8,7 @@ if __name__ == "__main__":
     # instantiations and queries causing invalid benchmark results. For use outside of my (Ruben's) computer change this
     instantiation_benchmark_location = r"C:\Users\Administrator\projects\benchmarks\watdiv-dataset\dataset.nt"
 
-    project_root = os.path.join(os.getcwd(), "..", "..")
+    project_root = os.getcwd()
     onehot_embedding_save_location = os.path.join(project_root, "output", "entity_embeddings",
                                                   "embeddings_onehot_encoded.txt")
     rdf2vec_vector_save_location = os.path.join(project_root, "output", "entity_embeddings",
