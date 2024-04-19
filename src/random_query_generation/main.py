@@ -3,10 +3,10 @@ import os
 
 import numpy as np
 from rdflib import Graph
-from src.random_query_generation.generate_complex_queries import generate_complex_queries
-from src.random_query_generation.generate_path_queries import generate_path_queries
-from src.random_query_generation.generate_star_queries import generate_star_queries
-from src.random_query_generation.utils import filter_isomorphic_queries
+from generate_complex_queries import generate_complex_queries
+from generate_path_queries import generate_path_queries
+from generate_star_queries import generate_star_queries
+from utils import filter_isomorphic_queries
 
 
 def main(save_location=None):

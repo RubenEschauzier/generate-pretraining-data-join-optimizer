@@ -1,7 +1,7 @@
 import math
 import random
 from tqdm.auto import tqdm
-from src.random_query_generation.utils import update_counts_predicates_used, choose_triple_weighted, get_all_subject, \
+from utils import update_counts_predicates_used, choose_triple_weighted, get_all_subject, \
     get_all_object, generate_triple_string, track_equivalent_predicates, filter_equivalent_queries, \
     filter_isomorphic_queries, generate_corrupted_predicates_walks
 

@@ -1,7 +1,7 @@
 import os
 
-from src.entity_embedding_generation.onehot_entity_embedding import main_onehot_embedding
-from src.entity_embedding_generation.rdf2vec_entity_embedding import main_rdf2vec
+from onehot_entity_embedding import main_onehot_embedding
+from rdf2vec_entity_embedding import main_rdf2vec
 
 if __name__ == "__main__":
     # This is a system-wide instantiation of watdiv used for every project. This is to prevent mixing watdiv

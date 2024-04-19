@@ -1,9 +1,7 @@
-import math
 import numpy as np
 import random
 import re
 import rdflib.term
-from typing import Literal
 from rdflib.compare import to_isomorphic
 from rdflib.graph import Graph
 from sklearn.preprocessing import minmax_scale

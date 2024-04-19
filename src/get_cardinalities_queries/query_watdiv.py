@@ -1,7 +1,7 @@
 import json
 import os
 
-from src.get_cardinalities_queries.queryVirtuoso import wrapper, execute_array_of_queries
+from queryVirtuoso import wrapper, execute_array_of_queries
 
 
 def load_watdiv(query_location):

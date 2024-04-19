@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from src.get_cardinalities_queries.queryVirtuoso import execute_array_of_queries, wrapper
+from queryVirtuoso import execute_array_of_queries, wrapper
 
 
 def load_queries(query_location):

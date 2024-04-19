@@ -1,6 +1,6 @@
 import random
 from tqdm.auto import tqdm
-from src.random_query_generation.utils import generate_triple_string, filter_isomorphic_queries, \
+from utils import generate_triple_string, filter_isomorphic_queries, \
     count_predicates_queries, get_all_subject, update_counts_predicates_used, choose_triple_weighted, \
     generate_corrupted_predicates_walks
 

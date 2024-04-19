@@ -1,7 +1,7 @@
 import random
 import rdflib.term
 from tqdm import tqdm
-from src.random_query_generation.utils import filter_isomorphic_queries, update_counts_predicates_used, \
+from utils import filter_isomorphic_queries, update_counts_predicates_used, \
     choose_triple_weighted, get_start_triple_walk, get_all_subject, track_equivalent_predicates, \
     filter_equivalent_queries, generate_corrupted_predicates_walks
 
