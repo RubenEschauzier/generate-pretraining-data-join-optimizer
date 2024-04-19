@@ -185,7 +185,12 @@ fabric.properties
 /.idea/
 /data_watdiv
 /generation_results/
-/output/*
+
+/output/randomly_generated_queries/*
+/output/randomly_generated_train_dataset/*
+/output/validation_dataset_watdiv/*
+/output/entity_embeddings/*
+
 
 # Output directory structure to seperate different script outputs
 !/output/randomly_generated_queries/.keep
