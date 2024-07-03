@@ -197,3 +197,6 @@ fabric.properties
 !/output/randomly_generated_train_dataset/.keep
 !/output/validation_dataset_watdiv/.keep
 !/output/entity_embeddings/.keep
+
+# Own stuff I want to keep out
+command.txt

@@ -1,7 +1,7 @@
 import random
 import rdflib.term
 from tqdm import tqdm
-from utils import filter_isomorphic_queries, update_counts_predicates_used, \
+from src.random_query_generation.utils import filter_isomorphic_queries, update_counts_predicates_used, \
     choose_triple_weighted, get_start_triple_walk, get_all_subject, track_equivalent_predicates, \
     filter_equivalent_queries, generate_corrupted_predicates_walks
 
@@ -60,12 +60,12 @@ def generate_path_walks(g, start_points, repeats, max_size):
     return all_walks
 
 
-def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
+def generate_path_queries(g, repeats, max_walk_size, p_literal, p_walk_corrupt):
     all_subj = get_all_subject(g)
     walks = generate_path_walks(g, all_subj, repeats, max_walk_size)
     # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
-    corrupted_predicates_walks = generate_corrupted_predicates_walks(g, walks, 2, 2, .25)
+    corrupted_predicates_walks = generate_corrupted_predicates_walks(g, walks, 1, 2, p_walk_corrupt)
     walks.extend(corrupted_predicates_walks)
 
     queries = []
@@ -75,7 +75,6 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
     print("Generating path randomly_generated_queries from walk \n")
     for walk in tqdm(walks):
         predicates = tuple(sorted([triple[1] for triple in walk]))
-        equivalent_predicates = track_equivalent_predicates(used_predicates, predicates)
         variable_counter = 1
         non_variable_edges = 0
         term_to_variable_dict = {}
@@ -95,7 +94,7 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
             )
             if i == len(walk) - 1:
                 r = random.uniform(0, 1)
-                if r < prob_non_variable:
+                if r < p_literal:
                     non_variable_edges += 1
 
                     # If literal at end we don't add brackets, because not URI
@@ -116,7 +115,7 @@ def generate_path_queries(g, repeats, max_walk_size, prob_non_variable):
             walk_query += triple_string
         walk_query += "}"
         queries.append(walk_query)
-    print("Filter path randomly_generated_queries")
+    print("Filter path randomly_generated_queries \n")
     queries = filter_isomorphic_queries(queries)
     return queries
 

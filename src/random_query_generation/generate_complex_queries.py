@@ -1,30 +1,31 @@
 import random
 from tqdm.auto import tqdm
-from utils import generate_triple_string, filter_isomorphic_queries, \
+from src.random_query_generation.utils import generate_triple_string, filter_isomorphic_queries, \
     count_predicates_queries, get_all_subject, update_counts_predicates_used, choose_triple_weighted, \
-    generate_corrupted_predicates_walks
+    generate_corrupted_predicates_walks, get_all_object
 
 
-def generate_complex_queries(g, repeats, min_size_walk, max_size_walk, p_literal):
+def generate_complex_queries(g, repeats, min_size_walk, max_size_walk, p_literal, p_walk_corrupt):
     all_subj = get_all_subject(g)
-
+    all_obj = get_all_object(g)
     complex_walks = generate_complex_walks(g, all_subj, repeats, min_size_walk, max_size_walk)
     # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
-    corrupted_predicates_walks = generate_corrupted_predicates_walks(g, complex_walks, 2, 2, .25)
+    corrupted_predicates_walks = generate_corrupted_predicates_walks(g, complex_walks, 1, 2, p_walk_corrupt)
     complex_walks.extend(corrupted_predicates_walks)
     # Count predicates in walks
 
     complex_queries = []
-    print("Generating randomly_generated_queries from walks")
+    print("Generating randomly_generated_queries from walks \n")
+
     for walk in tqdm(complex_walks):
-        walk_query = generate_complex_query_string(g, walk, p_literal)
+        walk_query = generate_complex_query_string(g, all_subj, all_obj, walk, p_literal)
         complex_queries.append(walk_query)
 
-    print("Filter complex randomly_generated_queries")
+    print("Filter complex randomly_generated_queries \n")
     complex_queries = filter_isomorphic_queries(complex_queries)
     predicate_counts = count_predicates_queries(complex_queries)
-    return complex_queries
+    return complex_queries, predicate_counts
 
 
 def generate_complex_walks(g, start_points, repeats, min_size_walk, max_size_walk):
@@ -32,7 +33,7 @@ def generate_complex_walks(g, start_points, repeats, min_size_walk, max_size_wal
     predicate_usage_counts = {}
     all_walks = []
     # Iterate over start points
-    print("Generating complex walks")
+    print("Generating complex walks \n")
     for start_point in tqdm(start_points):
         # Get all possible start triples from current start point
         possible_triples_from_start_point = list(g.triples((start_point, None, None)))
@@ -97,7 +98,7 @@ def generate_complex_walks(g, start_points, repeats, min_size_walk, max_size_wal
     return all_walks
 
 
-def generate_complex_query_string(g, walk, p_literal):
+def generate_complex_query_string(g, all_subj, all_obj,walk, p_literal):
     outer_triples = determine_outer_triples(walk)
     variable_counter = 1
     non_variable_edges = 0
@@ -116,11 +117,11 @@ def generate_complex_query_string(g, walk, p_literal):
                 term_to_variable_dict[triple[2]] = "?v{}".format(variable_counter)
                 variable_counter += 1
             # Get r to max value = 1, so triple string will always be with variable
-            triple_string, non_variable_edge = generate_triple_string(g, triple, 1, p_literal,
+            triple_string, non_variable_edge = generate_triple_string(g, all_subj, all_obj, triple, 1, p_literal,
                                                                       term_to_variable_dict, .1)
         # Here we add literal as object
         else:
-            triple_string, non_variable_edge = generate_triple_string(g, triple, r, p_literal,
+            triple_string, non_variable_edge = generate_triple_string(g, all_subj, all_obj, triple, r, p_literal,
                                                                       term_to_variable_dict, .1)
         if non_variable_edge:
             non_variable_edges += 1

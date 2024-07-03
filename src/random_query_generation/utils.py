@@ -151,7 +151,7 @@ def filter_equivalent_queries(walk_query,
     return all_queries, used_predicates_dict
 
 
-def generate_triple_string(g, triple, r, prob_non_variable_edge, term_to_variable_dict, p_corrupt_literal,
+def generate_triple_string(g, all_subj, all_obj, triple, r, prob_non_variable_edge, term_to_variable_dict, p_corrupt_literal,
                            object_centre=False):
     non_variable_edge = False
     if r > prob_non_variable_edge:
@@ -168,7 +168,7 @@ def generate_triple_string(g, triple, r, prob_non_variable_edge, term_to_variabl
         if r > p_corrupt_literal:
             subject_to_add = triple[0]
         else:
-            subject_to_add = get_corrupt_literal(g, 'subject')
+            subject_to_add = get_corrupt_literal(g, all_subj, all_obj, 'subject')
 
         if type(subject_to_add) == rdflib.term.Literal:
             triple_string = "\"{}\" <{}> {} . ".format(
@@ -191,7 +191,7 @@ def generate_triple_string(g, triple, r, prob_non_variable_edge, term_to_variabl
         if r > p_corrupt_literal:
             object_to_add = triple[2]
         else:
-            object_to_add = get_corrupt_literal(g, 'object')
+            object_to_add = get_corrupt_literal(g, all_subj, all_obj, 'object')
 
         if type(object_to_add) == rdflib.term.Literal:
             triple_string = "{} <{}> \"{}\" . ".format(
@@ -232,20 +232,18 @@ def generate_corrupted_predicates_walks(g, walks, n_corrupted_walks, max_predica
     return all_corrupted_walks
 
 
-def get_corrupt_literal(g, corruptionType):
+def get_corrupt_literal(g, all_subj, all_obj, corruptionType):
     if corruptionType == 'object':
-        return randomly_sample_object_literal(g)
+        return randomly_sample_object_literal(g, all_obj)
     elif corruptionType == 'subject':
-        return randomly_sample_subject_literal(g)
+        return randomly_sample_subject_literal(g, all_subj)
     else:
         raise ValueError("Invalid parameter passed to literal corruption function")
 
 
-def randomly_sample_object_literal(g):
-    objects = get_all_object(g)
+def randomly_sample_object_literal(g, objects):
     return random.choice(list(objects))
 
 
-def randomly_sample_subject_literal(g):
-    subjects = get_all_subject(g)
+def randomly_sample_subject_literal(g, subjects):
     return random.choice(list(subjects))

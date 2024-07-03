@@ -1,12 +1,12 @@
 import math
 import random
 from tqdm.auto import tqdm
-from utils import update_counts_predicates_used, choose_triple_weighted, get_all_subject, \
+from src.random_query_generation.utils import update_counts_predicates_used, choose_triple_weighted, get_all_subject, \
     get_all_object, generate_triple_string, track_equivalent_predicates, filter_equivalent_queries, \
     filter_isomorphic_queries, generate_corrupted_predicates_walks
 
 
-def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
+def generate_star_queries(g, repeats, max_size_star, p_literal, p_walk_corrupt):
     all_subj = get_all_subject(g)
     all_obj = get_all_object(g)
 
@@ -21,7 +21,7 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     print("Corrupting star walks subject centre \n")
     corrupted_predicates_walks_subject_centre = generate_corrupted_predicates_walks(g, star_walks_subject_centre,
-                                                                                    2, 2, .25)
+                                                                                    1, 2, p_walk_corrupt)
     star_walks_subject_centre.extend(corrupted_predicates_walks_subject_centre)
 
     print("Generating star walks object centre \n")
@@ -32,20 +32,17 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     print("Corrupting star walks object centre \n")
     corrupted_predicates_walks_object_centre = generate_corrupted_predicates_walks(g, star_walks_object_centre,
-                                                                                   2, 2, .25)
+                                                                                   1, 2, p_walk_corrupt)
     star_walks_object_centre.extend(corrupted_predicates_walks_object_centre)
 
     queries_subject_centre = []
     queries_object_centre = []
     used_predicates_subject_centre = set()
-    used_predicates_subject_centre_dict = {}
     used_predicates_object_centre = set()
-    used_predicates_object_centre_dict = {}
     # Generate subject_centre randomly_generated_queries
     print("Generating subject centre star randomly_generated_queries from walks \n")
     for walk_subject_centre in tqdm(star_walks_subject_centre):
         predicates = tuple(sorted([triple[1] for triple in walk_subject_centre]))
-        equivalent_predicates = track_equivalent_predicates(used_predicates_subject_centre, predicates)
         variable_counter = 1
         non_variable_edges = 0
         term_to_variable_dict = {}
@@ -57,11 +54,11 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
                 variable_counter += 1
 
             r = random.uniform(0, 1)
-            if r > prob_non_variable_edge:
+            if r > p_literal:
                 if triple[2] not in term_to_variable_dict:
                     term_to_variable_dict[triple[2]] = "?v{}".format(variable_counter)
                     variable_counter += 1
-            triple_string, non_variable_edge = generate_triple_string(g, triple, r, prob_non_variable_edge,
+            triple_string, non_variable_edge = generate_triple_string(g, all_subj, all_obj, triple, r, p_literal,
                                                                       term_to_variable_dict, .3)
 
             if non_variable_edge:
@@ -91,7 +88,7 @@ def generate_star_queries(g, repeats, max_size_star, prob_non_variable_edge):
                 term_to_variable_dict[triple[0]] = "?v{}".format(variable_counter)
                 variable_counter += 1
             # Here we set r to arbitrary one, indicating that it will never have literals in the query
-            triple_string, non_variable_edge = generate_triple_string(g, triple, 1, prob_non_variable_edge,
+            triple_string, non_variable_edge = generate_triple_string(g, all_subj, all_obj, triple, 1, p_literal,
                                                                       term_to_variable_dict, .3,
                                                                       object_centre=True)
             if non_variable_edge:
@@ -146,7 +143,8 @@ def extend_star_walk(possible_star_points, max_points, all_walks, predicate_usag
     return all_walks
 
 
-# TODO: Docstring, note triple_to_ignore denotes the triple that connects multiple star randomly_generated_queries together
+# TODO: Docstring, note triple_to_ignore denotes the triple that connects multiple star randomly_generated_queries
+#  together
 def get_possible_star_points_subject_centre(g, star_centre, points_to_ignore=None):
     all_triples = list(g.triples((star_centre, None, None)))
     if points_to_ignore:
