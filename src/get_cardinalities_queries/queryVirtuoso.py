@@ -1,5 +1,6 @@
+import requests
 from SPARQLWrapper import SPARQLWrapper, JSON
-import numpy as np
+import os
 from tqdm import tqdm
 import json
 
@@ -18,7 +19,13 @@ def wrapper(url, default_graph):
 def execute_query(query, wrapped_sparql_endpoint):
     wrapped_sparql_endpoint.setTimeout(60)
     wrapped_sparql_endpoint.setQuery(query)
-    return wrapped_sparql_endpoint.queryAndConvert()
+    try:
+        res = wrapped_sparql_endpoint.queryAndConvert()
+    except TimeoutError as err:
+        res = 'NO'
+        pass
+
+    return res
 
 
 def count_results(result):
@@ -29,21 +36,20 @@ def count_results(result):
     return count
 
 
-def execute_array_of_queries(queries, endpoint, ckp=None, queryRandom=True):
+def execute_array_of_queries(queries, endpoint, ckp=None):
     query_strings = []
     query_cardinalities = []
 
-    for i, query in enumerate(tqdm(queries)):
-        if queryRandom:
-            ret = execute_query(query[0], endpoint)
-        else:
-            ret = execute_query(query, endpoint)
+    if ckp:
+        os.makedirs(ckp, exist_ok=True)
 
+    for i, query in enumerate(tqdm(queries)):
+        ret = execute_query(query, endpoint)
+        if ret == 'NO':
+            continue
         query_cardinalities.append(count_results(ret))
-        if queryRandom:
-            query_strings.append(query[0])
-        else:
-            query_strings.append(query)
+        query_strings.append(query)
+
         if ckp and i % 5 == 0 and i > 0:
             with open(ckp + "/query_strings.json", "w") as f:
                 json.dump(query_strings, f)

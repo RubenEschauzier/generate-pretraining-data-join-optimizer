@@ -12,8 +12,7 @@ def load_watdiv(query_location):
 def main(endpoint, graph_uri, queries_location, dataset_save_location, ckp_location=None):
     queries = load_watdiv(queries_location)
     wrapped_endpoint = wrapper(endpoint, graph_uri)
-    full_query_string, full_cardinalities = execute_array_of_queries(queries, wrapped_endpoint, ckp_location,
-                                                                     queryRandom=False)
+    full_query_string, full_cardinalities = execute_array_of_queries(queries, wrapped_endpoint, ckp_location)
 
     with open(dataset_save_location + "/query_strings.json", "w") as f:
         json.dump(full_query_string, f)

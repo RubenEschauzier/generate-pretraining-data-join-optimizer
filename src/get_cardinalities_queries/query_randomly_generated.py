@@ -22,8 +22,7 @@ def main(endpoint, graph_uri, queries_location, dataset_save_location, ckp_locat
 
 
 if __name__ == "__main__":
-    project_root = os.getcwd()
-
+    project_root = os.path.join(os.getcwd(), "..", "..")
     randomly_generated_queries_location = os.path.join(project_root, "output", "randomly_generated_queries",
                                                        "queries_complex.npy")
     dataset_save_location = os.path.join(project_root, "output", "randomly_generated_train_dataset")
