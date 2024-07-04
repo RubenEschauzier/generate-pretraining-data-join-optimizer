@@ -15,20 +15,20 @@ def generate(dataset_location, save_location=None):
     input_graph.parse(dataset_location, format="nt")
     print("Generating complex randomly_generated_queries")
     complex_queries, pred_counts = generate_complex_queries(input_graph,
-                                                            repeats=1,
+                                                            repeats=2,
                                                             min_size_walk=3,
                                                             max_size_walk=7,
                                                             p_literal=.5,
                                                             p_walk_corrupt=.01)
     print("Generating path randomly_generated_queries")
     generated_path_queries = generate_path_queries(input_graph,
-                                                   repeats=1,
+                                                   repeats=5,
                                                    max_walk_size=5,
                                                    p_literal=.5,
                                                    p_walk_corrupt=.1)
     print("Generating star randomly_generated_queries")
     subject_stars, object_stars = generate_star_queries(input_graph,
-                                                        repeats=1,
+                                                        repeats=10,
                                                         max_size_star=5,
                                                         p_literal=.25,
                                                         p_walk_corrupt=.1)

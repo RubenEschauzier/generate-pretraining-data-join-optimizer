@@ -13,7 +13,7 @@ if __name__ == "__main__":
     instantiation_benchmark_location = r"C:\Users\ruben\benchmarks\dataset.nt"
 
     randomly_generated_queries_location = os.path.join(project_root, "output", "randomly_generated_queries",
-                                                       "queries_complex.txt")
+                                                       "queries_generated_large.txt")
 
     generate(instantiation_benchmark_location, randomly_generated_queries_location)
     pass
