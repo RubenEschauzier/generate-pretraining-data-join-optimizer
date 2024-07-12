@@ -22,9 +22,8 @@ def load_queries_text(query_location):
 
 def main(endpoint, graph_uri, queries_location, save_location, parallel=False, n_proc=2, ckp_location=None):
     queries = load_queries_text(queries_location)
-    # queries = load_queries(queries_location)
     wrapped_endpoint = wrapper(endpoint, graph_uri)
-    
+
     if parallel:
         full_query_string, full_cardinalities = query_parallel(n_proc, queries, wrapped_endpoint, ckp_location)
     else:
@@ -47,7 +46,7 @@ def main(endpoint, graph_uri, queries_location, save_location, parallel=False, n
 if __name__ == "__main__":
     project_root = os.path.join(os.getcwd(), "..", "..")
     randomly_generated_queries_location = os.path.join(project_root, "output", "randomly_generated_queries",
-                                                       "queries_generated_large.txt")
+                                                       "queries_generated_large_less_empty.txt")
     dataset_save_location = os.path.join(project_root, "output", "randomly_generated_train_dataset")
     dataset_ckp_location = os.path.join(dataset_save_location, "ckp")
     engine_endpoint = "http://localhost:8890/sparql"
@@ -58,6 +57,6 @@ if __name__ == "__main__":
          randomly_generated_queries_location,
          dataset_save_location,
          parallel=True,
-         n_proc=12,
+         n_proc=8,
          ckp_location=dataset_ckp_location
          )

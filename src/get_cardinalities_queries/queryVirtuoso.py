@@ -1,4 +1,6 @@
-from multiprocessing import Pool
+import logging
+from multiprocessing import Pool, log_to_stderr
+from multiprocessing import get_context
 from SPARQLWrapper import SPARQLWrapper, JSON
 import os
 from tqdm import tqdm
@@ -21,7 +23,7 @@ def execute_query(query, wrapped_sparql_endpoint):
     wrapped_sparql_endpoint.setQuery(query)
     try:
         res = wrapped_sparql_endpoint.queryAndConvert()
-    except TimeoutError as err:
+    except:
         res = 'NO'
         pass
     # Changed this to return query too
@@ -39,7 +41,8 @@ def count_results(result):
 def wrapped_execute_query(arg):
     return execute_query(*arg)
 
-def query_parallel(n_proc, queries, endpoint, ckp = None):
+
+def query_parallel(n_proc, queries, endpoint, ckp=None):
     """
     Drop-in replacement for execute array of queries but with parallel processing. Only use with endpoints that process
     multiple queries simultaneously on the same endpoint (like virtuoso).
@@ -55,11 +58,12 @@ def query_parallel(n_proc, queries, endpoint, ckp = None):
     :return: the queries and cardinalities (re-ordered due to parallel processing)
     :rtype: list[list[str, list[int]]]
     """
+
     queries_processed = []
     cardinalities = []
     n_queries_processed = 0
     tasks = [[query, endpoint] for query in queries]
-    with Pool(n_proc) as pool:
+    with get_context("spawn").Pool(n_proc) as pool:
         # We use unordered imap for faster iteration, but ensure query and result match by returning both in
         # the mapped function
         for result in tqdm(pool.imap_unordered(wrapped_execute_query, tasks), total=len(tasks)):
@@ -70,7 +74,7 @@ def query_parallel(n_proc, queries, endpoint, ckp = None):
             cardinalities.append(count_results(result[1]))
             n_queries_processed += 1
 
-            if ckp and n_queries_processed % 5 == 0:
+            if ckp and n_queries_processed % 10000 == 0:
                 with open(ckp + "/queries.txt", 'w') as f:
                     for query in queries_processed:
                         f.write(query + "\n")
@@ -97,11 +101,6 @@ def execute_array_of_queries(queries, endpoint, ckp=None):
         query_strings.append(query)
 
         if ckp and i % 5 == 0 and i > 0:
-            with open(ckp + "/query_strings.json", "w") as f:
-                json.dump(query_strings, f)
-            with open(ckp + "/query_cardinalities.json", "w") as f:
-                json.dump(query_cardinalities, f)
-
             with open(ckp + "/queries.txt", 'w') as f:
                 for query in query_strings:
                     f.write(query + "\n")
