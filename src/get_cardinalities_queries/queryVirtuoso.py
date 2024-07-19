@@ -23,7 +23,8 @@ def execute_query(query, wrapped_sparql_endpoint):
     wrapped_sparql_endpoint.setQuery(query)
     try:
         res = wrapped_sparql_endpoint.queryAndConvert()
-    except:
+    except Exception as e:
+        print(e)
         res = 'NO'
         pass
     # Changed this to return query too
@@ -94,7 +95,7 @@ def execute_array_of_queries(queries, endpoint, ckp=None):
         os.makedirs(ckp, exist_ok=True)
 
     for i, query in enumerate(tqdm(queries)):
-        ret = execute_query(query, endpoint)
+        query, ret = execute_query(query, endpoint)
         if ret == 'NO':
             continue
         query_cardinalities.append(count_results(ret))

@@ -198,5 +198,6 @@ fabric.properties
 !/output/validation_dataset_watdiv/.keep
 !/output/entity_embeddings/.keep
 
+input/
 # Own stuff I want to keep out
 command.txt
