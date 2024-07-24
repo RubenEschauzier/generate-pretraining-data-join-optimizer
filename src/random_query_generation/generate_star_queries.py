@@ -3,7 +3,7 @@ import random
 from tqdm.auto import tqdm
 from src.random_query_generation.utils import update_counts_predicates_used, choose_triple_weighted, get_all_subject, \
     get_all_object, generate_triple_string, track_equivalent_predicates, filter_equivalent_queries, \
-    filter_isomorphic_queries, generate_corrupted_predicates_walks
+    filter_isomorphic_queries, generate_corrupted_predicates_walks, flattened_triple_sampling
 
 
 def generate_star_queries(g, repeats, max_size_star, p_literal, p_walk_corrupt):
@@ -17,8 +17,8 @@ def generate_star_queries(g, repeats, max_size_star, p_literal, p_walk_corrupt):
     print("Generating star walks subject centre \n")
     star_walks_subject_centre = generate_star_walks_subject_centre(g, all_subj, repeats, max_size_star,
                                                                    predicate_usage_counts_subject_centre)
+
     # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
-    # TODO Add n_corrupted, max_corrupted, p_corruption as params
     print("Corrupting star walks subject centre \n")
     corrupted_predicates_walks_subject_centre = generate_corrupted_predicates_walks(g, star_walks_subject_centre,
                                                                                     1, 2, p_walk_corrupt)
@@ -111,7 +111,10 @@ def generate_star_walks_subject_centre(g, start_points, repeats, max_points,
         for i in range(repeats):
             possible_star_points = get_possible_star_points_subject_centre(g, star_centre, triples_to_ignore)
             all_walks = extend_star_walk(possible_star_points, max_points, all_walks,
-                                         predicate_usage_counts)
+                                         predicate_usage_counts,
+                                         unique_predicates_in_walk=True,
+                                         flattened_sampling=True)
+
     return all_walks
 
 
@@ -122,20 +125,41 @@ def generate_star_walks_object_centre(g, start_points, repeats, max_points,
         for i in range(repeats):
             possible_star_points = get_possible_star_points_object_centre(g, star_centre, triples_to_ignore)
             all_walks = extend_star_walk(possible_star_points, max_points, all_walks,
-                                         predicate_usage_counts)
+                                         predicate_usage_counts,
+                                         unique_predicates_in_walk=True,
+                                         flattened_sampling=True)
     return all_walks
 
 
-def extend_star_walk(possible_star_points, max_points, all_walks, predicate_usage_counts):
+def extend_star_walk(possible_star_points, max_points, all_walks, predicate_usage_counts,
+                     unique_predicates_in_walk=False, flattened_sampling=False):
     walk = []
+    predicates_in_walk = set()
     size = random.randrange(2, max_points)
 
     for j in range(size):
+
+        # Filter predicates already in the star
+        if unique_predicates_in_walk:
+            candidates = []
+            for triple in possible_star_points:
+                if triple[1] not in predicates_in_walk:
+                    candidates.append(triple)
+            possible_star_points = candidates
+
+        # If filtering results in no more candidates we stop extending
         if len(possible_star_points) == 0:
             break
+
+        # Choose triple with chosen sampling method
         new_star_point, possible_star_points, predicate_usage_counts = \
-            sample_new_star_point(possible_star_points, predicate_usage_counts)
+            sample_new_star_point(possible_star_points,
+                                  predicate_usage_counts=predicate_usage_counts,
+                                  flattened_sampling=flattened_sampling
+                                  )
+
         walk.append(new_star_point)
+        predicates_in_walk.add(new_star_point[1])
 
     if len(walk) > 1:
         all_walks.append(walk)
@@ -163,12 +187,22 @@ def get_possible_star_points_object_centre(g, star_centre, points_to_ignore=None
     return all_triples
 
 
-def sample_new_star_point(all_triples, predicate_usage_counts=None):
-    if predicate_usage_counts is not None:
+def sample_new_star_point(all_triples,
+                          flattened_sampling=False,
+                          predicate_usage_counts=None):
+
+    # Choose sampling method based on priority, flattened sampling first
+    if flattened_sampling:
+        sampled_triple = flattened_triple_sampling(all_triples)
+        all_triples.remove(sampled_triple)
+        return sampled_triple, all_triples, predicate_usage_counts
+    # Then sample according to weights if not flattened sampling and we do get predicate_usage_counts
+    elif predicate_usage_counts is not None:
         chosen_index, predicate_usage_counts = choose_triple_weighted(
             all_triples, predicate_usage_counts)
         predicate_usage_counts = update_counts_predicates_used(
             all_triples, chosen_index, predicate_usage_counts)
+    # Otherwise just do random sampling over candidate triples
     else:
         chosen_index = random.randrange(len(all_triples))
     returned_triple = all_triples[chosen_index]

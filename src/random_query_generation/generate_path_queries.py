@@ -7,12 +7,22 @@ from src.random_query_generation.utils import filter_isomorphic_queries, update_
 
 
 # Note: the walk v1 -> v2 -> v3 has v1 as tail and v3 as head
-def extend_walk_path(g, head, tail, walk, predicate_usage_counts=None):
+def extend_walk_path(g, head, tail, walk, unique_predicates_in_walk=False, predicate_usage_counts=None):
+    # TODO: Ensure equal weight for all predicates similar to how start walk works
     triples_head = list(g.triples((head, None, None)))
     triples_tail = list(g.triples((None, None, tail)))
-
-    all_triples = triples_head.copy()
-    all_triples.extend(triples_tail)
+    if unique_predicates_in_walk:
+        all_triples = []
+        predicates_walk = set([triple[1] for triple in walk])
+        for h_triple in triples_head:
+            if h_triple[1] not in predicates_walk:
+                all_triples.append(h_triple)
+        for t_triple in triples_head:
+            if t_triple[1] not in predicates_walk:
+                all_triples.append(t_triple)
+    else:
+        all_triples = triples_head.copy()
+        all_triples.extend(triples_tail)
 
     if len(all_triples) == 0:
         return head, tail, walk, predicate_usage_counts
@@ -26,7 +36,7 @@ def extend_walk_path(g, head, tail, walk, predicate_usage_counts=None):
     else:
         # Choose with equal weight
         chosen_index = random.randrange(len(all_triples))
-    # chosen_index = random.randrange(len(all_triples))
+
     # Determine whether we extend at head or tail
     if chosen_index >= len(triples_head):
         # If we get new tail, we insert at front of list to retain order of walk
@@ -39,13 +49,15 @@ def extend_walk_path(g, head, tail, walk, predicate_usage_counts=None):
     return new_head, tail, walk, predicate_usage_counts
 
 
-def generate_path_walks(g, start_points, repeats, max_size):
+def generate_path_walks(g, start_points, repeats, max_size, unique_predicates_in_walk=False):
     predicate_usage_counts = {}
     all_walks = []
     print("Generating path walks \n")
     for start in tqdm(start_points):
+        used_predicates = set()
         for i in range(repeats):
-            start_triple = get_start_triple_walk(start, g)
+            start_triple = get_start_triple_walk(start, g, flattened_sampling=True)
+            used_predicates.add(start_triple[1])
             head = start_triple[2]
             tail = start_triple[0]
             size = random.randrange(2, max_size)
@@ -53,16 +65,21 @@ def generate_path_walks(g, start_points, repeats, max_size):
 
             for j in range(size):
                 head, tail, walk, predicate_usage_counts = extend_walk_path(
-                    g, head, tail, walk, predicate_usage_counts)
+                    g, head, tail, walk,
+                    unique_predicates_in_walk=unique_predicates_in_walk,
+                    predicate_usage_counts=predicate_usage_counts,
+                )
 
             if len(walk) > 1:
                 all_walks.append(walk)
     return all_walks
 
 
-def generate_path_queries(g, repeats, max_walk_size, p_literal, p_walk_corrupt):
+def generate_path_queries(g, repeats, max_walk_size, p_literal, p_walk_corrupt, unique_predicates_in_query=False):
     all_subj = get_all_subject(g)
-    walks = generate_path_walks(g, all_subj, repeats, max_walk_size)
+    walks = generate_path_walks(g, all_subj, repeats, max_walk_size,
+                                unique_predicates_in_walk=unique_predicates_in_query
+                                )
     # Add walks that have random predicates in them to include randomly_generated_queries with result size = 0
     # TODO Add n_corrupted, max_corrupted, p_corruption as params
     corrupted_predicates_walks = generate_corrupted_predicates_walks(g, walks, 1, 2, p_walk_corrupt)
@@ -118,5 +135,3 @@ def generate_path_queries(g, repeats, max_walk_size, p_literal, p_walk_corrupt):
     print("Filter path randomly_generated_queries \n")
     queries = filter_isomorphic_queries(queries)
     return queries
-
-

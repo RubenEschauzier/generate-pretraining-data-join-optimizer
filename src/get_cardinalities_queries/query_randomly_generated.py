@@ -50,11 +50,11 @@ def main(endpoint, graph_uri, queries_location, save_location, parallel=False, n
 
     with open(save_location + "/queries.txt", 'w') as f:
         for query in full_query_string:
-            f.write(query + "\n")
+            f.write(query)
 
     with open(save_location + "/cardinalities.txt", 'w') as f:
         for card in full_cardinalities:
-            f.write(str(card) + "\n")
+            f.write(str(card))
 
 
 def main_watdiv(endpoint, graph_uri, queries_location, save_location):
@@ -82,24 +82,56 @@ if __name__ == "__main__":
     project_root = os.path.join(os.getcwd(), "..", "..")
 
     randomly_generated_queries_location = os.path.join(project_root, "output", "randomly_generated_queries",
-                                                       "queries_generated_large_less_empty.txt")
+                                                       "queries_generated_large_less_empty")
+
+    path_location = randomly_generated_queries_location + "_path.txt"
+    star_location = randomly_generated_queries_location + "_star.txt"
+    complex_location = randomly_generated_queries_location + "_complex.txt"
+
     random_dataset_save_location = os.path.join(project_root, "output", "randomly_generated_train_dataset")
+
+    save_location_path = os.path.join(random_dataset_save_location, "path")
+    save_location_star = os.path.join(random_dataset_save_location, "star")
+    save_location_complex = os.path.join(random_dataset_save_location, "complex")
+
     random_dataset_ckp_location = os.path.join(random_dataset_save_location, "ckp")
+    # TODO: Make directory ckp if it doesnt exist
+    ckp_path = os.path.join(save_location_path, "ckp")
+    ckp_star = os.path.join(save_location_star, "ckp")
+    ckp_complex = os.path.join(save_location_complex, "ckp")
 
     watdiv_queries_location = os.path.join(project_root, "input", "watdiv_queries")
     watdiv_output_location = os.path.join(project_root, "output", "watdiv_query_cardinalities")
 
-    main_watdiv(engine_endpoint,
-                graph_uri_endpoint,
-                watdiv_queries_location,
-                watdiv_output_location
-                )
-
-    # main(engine_endpoint,
-    #      graph_uri_endpoint,
-    #      randomly_generated_queries_location,
-    #      random_dataset_save_location,
-    #      parallel=True,
-    #      n_proc=8,
-    #      ckp_location=random_dataset_ckp_location
-    #      )
+    # main_watdiv(engine_endpoint,
+    #             graph_uri_endpoint,
+    #             watdiv_queries_location,
+    #             watdiv_output_location
+    #             )
+    print("Query Path")
+    main(engine_endpoint,
+         graph_uri_endpoint,
+         path_location,
+         random_dataset_save_location,
+         parallel=True,
+         n_proc=8,
+         ckp_location=ckp_path
+         )
+    print("Query Star")
+    main(engine_endpoint,
+         graph_uri_endpoint,
+         star_location,
+         random_dataset_save_location,
+         parallel=True,
+         n_proc=8,
+         ckp_location=ckp_star
+         )
+    print("Query Complex")
+    main(engine_endpoint,
+         graph_uri_endpoint,
+         complex_location,
+         random_dataset_save_location,
+         parallel=True,
+         n_proc=8,
+         ckp_location=ckp_complex
+         )

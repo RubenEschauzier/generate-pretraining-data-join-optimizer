@@ -70,10 +70,45 @@ def get_all_predicates(g):
     return all_pred
 
 
-def get_start_triple_walk(start_point, g):
+def get_start_triple_walk(start_point, g, flattened_sampling=False):
+    """
+
+    :param start_point: Start subject
+    :type start_point:
+    :param g: The graph
+    :type g:
+    :param flattened_sampling: Whether the start triple must be sampled according to predicates, meaning that each
+    predicate has equal chance to get chosen, regardless of the number of occurrences of the same predicate with
+    different objects. This is to ensure that sampling doesn't always start with the most common predicate, like
+    FriendOF
+    :type flattened_sampling: Boolean
+    :return:
+    :rtype:
+    """
     all_triples = list(g.triples((start_point, None, None)))
-    chosen_index = random.randrange(len(all_triples))
-    return all_triples[chosen_index]
+
+    # Flattened sampling means we chose a predicate from all possible predicates,
+    # and then choose a triple with that predicate. This ensures that predicates with many triples are not
+    # overrepresented in the queries
+    if flattened_sampling:
+        down_sampled_triples = []
+        predicate_to_triples = {}
+        treated_predicates = set()
+        for triple in all_triples:
+            if triple[1] not in treated_predicates:
+                down_sampled_triples.append(triple)
+                treated_predicates.add(triple[1])
+                predicate_to_triples[triple[1]] = [triple]
+            else:
+                predicate_to_triples[triple[1]].append(triple)
+        # Sample predicate
+        chosen_predicate = down_sampled_triples[random.randrange(len(down_sampled_triples))][1]
+        # Sample triple with the predicate
+        triples_with_predicate = predicate_to_triples[chosen_predicate]
+        return triples_with_predicate[random.randrange(len(triples_with_predicate))]
+    else:
+        chosen_index = random.randrange(len(all_triples))
+        return all_triples[chosen_index]
 
 
 def count_predicates_queries(queries):
@@ -247,3 +282,21 @@ def randomly_sample_object_literal(g, objects):
 
 def randomly_sample_subject_literal(g, subjects):
     return random.choice(list(subjects))
+
+
+def flattened_triple_sampling(triples):
+    down_sampled_triples = []
+    predicate_to_triples = {}
+    treated_predicates = set()
+    for triple in triples:
+        if triple[1] not in treated_predicates:
+            down_sampled_triples.append(triple)
+            treated_predicates.add(triple[1])
+            predicate_to_triples[triple[1]] = [triple]
+        else:
+            predicate_to_triples[triple[1]].append(triple)
+    # Sample predicate
+    chosen_predicate = down_sampled_triples[random.randrange(len(down_sampled_triples))][1]
+    # Sample triple with the predicate
+    triples_with_predicate = predicate_to_triples[chosen_predicate]
+    return triples_with_predicate[random.randrange(len(triples_with_predicate))]
