@@ -37,6 +37,7 @@ def load_queries_watdiv(location):
 def main(endpoint, graph_uri, queries_location, save_location, parallel=False, n_proc=2, ckp_location=None):
     queries = load_queries_text(queries_location)
     wrapped_endpoint = wrapper(endpoint, graph_uri)
+    print(wrapped_endpoint)
 
     if parallel:
         full_query_string, full_cardinalities = query_parallel(n_proc, queries, wrapped_endpoint, ckp_location)
